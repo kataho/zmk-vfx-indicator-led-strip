@@ -1,0 +1,7 @@
+config INDICATOR_LED_STRIP
+  bool "Enable indicators with LED strip"
+
+if INDICATOR_LED_STRIP
+
+
+endif # INDICATOR_LED_STRIP
