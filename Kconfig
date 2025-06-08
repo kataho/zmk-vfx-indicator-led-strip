@@ -1,9 +1,15 @@
 config INDICATOR_LED_STRIP
   bool "Enable indicators with LED strip"
+  select LED_STRIP
+  select ZMK_LOW_PRIORITY_WORK_QUEUE
 
 if INDICATOR_LED_STRIP
 
 # Settings
+config INDICATOR_LED_STRIP_EXT_POWER
+    bool "Indicators with LED strip toggling also controls external power"
 
+config INDICATOR_LED_STRIP_ON_START
+    bool "Indicators with LED strip starts on by default"
 
 endif # INDICATOR_LED_STRIP
