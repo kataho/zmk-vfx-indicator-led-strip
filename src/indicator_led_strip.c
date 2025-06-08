@@ -11,7 +11,6 @@
 #include <zephyr/drivers/led_strip.h>
 #include <drivers/ext_power.h>
 
-#include <zmk/workqueue.h>
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
@@ -19,6 +18,7 @@
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
+#include <zmk/workqueue.h>
 #include <zmk/keymap.h>
 #include <zmk/split/bluetooth/peripheral.h>
 
@@ -123,8 +123,7 @@ static int indicator_init(void) {
 #if IS_ENABLED(CONFIG_INDICATOR_LED_STRIP_EXT_POWER)
     if (!device_is_ready(ext_power)) {
         LOG_ERR("ext power device \"%s\" is not ready", ext_power->name);
-        //return -ENODEV;
-        return -1;
+        return -ENODEV;
     }
 #endif
 

@@ -1,4 +1,4 @@
-#define DT_DRV_COMPAT zmk_behavior_indicator_led_strip
+#define DT_DRV_COMPAT zmk_indicator_led_strip
 
 #include <zephyr/device.h>
 #include <drivers/behavior.h>
