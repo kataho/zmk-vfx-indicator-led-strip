@@ -121,9 +121,10 @@ static int indicator_init(void) {
     led_strip = DEVICE_DT_GET(STRIP_CHOSEN);
 
 #if IS_ENABLED(CONFIG_INDICATOR_LED_STRIP_EXT_POWER)
-    if(!device_is_ready(ext_power)) {
+    if (!device_is_ready(ext_power)) {
         LOG_ERR("ext power device \"%s\" is not ready", ext_power->name);
-        return -ENODEV;
+        //return -ENODEV;
+        return -1;
     }
 #endif
 
