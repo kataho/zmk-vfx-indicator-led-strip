@@ -13,3 +13,9 @@ config INDICATOR_LED_STRIP_ON_START
     bool "Indicators with LED strip starts on by default"
 
 endif # INDICATOR_LED_STRIP
+
+DT_COMPAT_ZMK_BEHAVIOR_INDICATOR_LED_STRIP := zmk,behavior-indicator-led-strip
+
+config ZMK_BEHAVIOR_INDICATOR_LED_STRIP
+    bool
+    default $(dt_compat_enabled,$(DT_COMPAT_ZMK_BEHAVIOR_INDICATOR_LED_STRIPß))
