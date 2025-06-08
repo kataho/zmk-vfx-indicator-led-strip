@@ -122,7 +122,7 @@ static int indicator_init(void) {
 
 #if IS_ENABLED(CONFIG_INDICATOR_LED_STRIP_EXT_POWER)
     if(!device_is_ready(ext_power)) {
-        LOG_ERROR("ext power device is not ready");
+        LOG_ERR("ext power device is not ready");
         return -ENODEV;
     }
 #endif
