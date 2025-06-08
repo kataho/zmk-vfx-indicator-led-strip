@@ -1,0 +1,9 @@
+description: Indicators with LED strip behavior
+
+compatible: "zmk,behavior-indicator-led-strip"
+
+include: zero_param.yaml
+
+properties:
+  toggle:
+    type: boolean

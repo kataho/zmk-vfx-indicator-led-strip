@@ -3,5 +3,7 @@ config INDICATOR_LED_STRIP
 
 if INDICATOR_LED_STRIP
 
+# Settings
+
 
 endif # INDICATOR_LED_STRIP

@@ -1,0 +1,10 @@
+/ {
+    behaviors {
+        /omit-if-no-ref/ toggle: toggle {
+            compatible = "zmk,behavior-indicator-led-strip";
+            display-name = "Indicator LED Strip";
+            #binding-cells = <0>;
+            toggle;
+        };
+    };
+};
