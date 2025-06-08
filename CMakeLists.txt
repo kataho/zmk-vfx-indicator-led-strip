@@ -1,4 +1,4 @@
 target_sources_ifdef(CONFIG_INDICATOR_LED_STRIP app PRIVATE src/indicator_led_strip.c)
-target_sources_ifdef(CONFIG_INDICATOR_LED_STRIP app PRIVATE src/behaviors/behavior_rgbled_widget.c)
+target_sources_ifdef(CONFIG_INDICATOR_LED_STRIP app PRIVATE src/behaviors/behavior_indicator_led_strip.c)
 
 zephyr_include_directories(include)
