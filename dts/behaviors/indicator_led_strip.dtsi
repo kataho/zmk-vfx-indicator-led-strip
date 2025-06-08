@@ -1,6 +1,6 @@
 / {
     behaviors {
-        /omit-if-no-ref/ toggle: toggle {
+        /omit-if-no-ref/ ils_tgl: ils_tgl {
             compatible = "zmk,behavior-indicator-led-strip";
             display-name = "Indicator LED Strip";
             #binding-cells = <0>;
