@@ -51,6 +51,6 @@ static const struct behavior_driver_api behavior_indicator_led_strip_driver_api 
     };                                                      \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_init, NULL, NULL, &behavior_config_##n,    \
                         POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT,          \
-                        &behavior_driver_api);
+                        &behavior_indicator_led_strip_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(INST_DEFINE)
