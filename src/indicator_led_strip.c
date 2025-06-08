@@ -11,6 +11,7 @@
 #include <zephyr/drivers/led_strip.h>
 #include <drivers/ext_power.h>
 
+#include <zmk/workqueue.h>
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
@@ -72,7 +73,7 @@ static int indicator_on(void) {
     if (ext_power != NULL) {
         int rc = ext_power_enable(ext_power);
         if (rc != 0) {
-            LOG_ERR("Unable to enable EXT_POWER: %d, rc);
+            LOG_ERR("Unable to enable EXT_POWER: %d", rc);
         }
     }
 #endif
@@ -98,7 +99,7 @@ static int indicator_off(void) {
     if (ext_power != NULL) {
         int rc = ext_power_disable(ext_power);
         if (rc != 0) {
-            LOG_ERR("Unable to disable EXT_POWER: %d, rc);
+            LOG_ERR("Unable to disable EXT_POWER: %d", rc);
         }
     }
 #endif
