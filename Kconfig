@@ -1,7 +1,8 @@
-config INDICATOR_LED_STRIP
+menuconfig INDICATOR_LED_STRIP
   bool "Enable indicators with LED strip"
   select LED_STRIP
   select ZMK_LOW_PRIORITY_WORK_QUEUE
+  select SPI
 
 if INDICATOR_LED_STRIP
 
