@@ -14,14 +14,6 @@ config INDICATOR_LED_STRIP_ON_START
     bool "Indicators with LED strip starts on by default"
     default y
 
-config INDICATOR_LED_STRIP_BREATHE
-    bool "Indicators with LED strip breathe while on"
-    default y
-
-config INDICATOR_LED_STRIP_OFF_IDLE
-    bool "Indicators with LED strip turn off on idle state"
-    default n
-
 endif # INDICATOR_LED_STRIP
 
 DT_COMPAT_ZMK_BEHAVIOR_INDICATOR_LED_STRIP := zmk,behavior-indicator-led-strip
