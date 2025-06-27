@@ -390,5 +390,5 @@ extern void indicator_led_strip_init_lazy(void) {
     bluetooth_listener_cb(NULL);
 }
 
-K_THREAD_DEFINE(init_thread, 1024, indicator_led_strip_init_lazy, NULL, NULL, NULL,
+K_THREAD_DEFINE(indicator_led_strip_init_thread, 1024, indicator_led_strip_init_lazy, NULL, NULL, NULL,
                 K_LOWEST_APPLICATION_THREAD_PRIO, 0, 200);
