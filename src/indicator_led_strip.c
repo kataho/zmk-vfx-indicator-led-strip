@@ -22,9 +22,9 @@
 
 #include <zmk_indicator_led_strip/indicator_led_strip.h>
 
-#define BASE_BRIGHTNESS_R 0.006f
-#define BASE_BRIGHTNESS_G 0.005f
-#define BASE_BRIGHTNESS_B 0.0064f
+#define BASE_BRIGHTNESS_R 0.012f
+#define BASE_BRIGHTNESS_G 0.01f
+#define BASE_BRIGHTNESS_B 0.0128f
 
 #define POWER_INDEX 0
 #define BLUET_INDEX 1
@@ -46,13 +46,13 @@
 #define BLUET_COLOR_DISCON ((RGB){r: 0, g: 0, b: 0})
 #define BLUET_COLOR_P0  ((RGB){r: 1.0, g: 0.3, b: 0})
 #define BLUET_COLOR_P1  ((RGB){r: 0,   g: 0.8, b: 1.0})
-#define BLUET_COLOR_P2  ((RGB){r: 0.8, g: 0.8, b: 0})
+#define BLUET_COLOR_P2  ((RGB){r: 0.3, g: 1.0, b: 0})
 #define BLUET_COLOR_PX  ((RGB){r: 1.0, g: 1.0, b: 1.0})
 
 #define LAYER_COLOR_L0 ((RGB){r: 1.0, g: 0,   b: 0})
-#define LAYER_COLOR_L1 ((RGB){r: 0.4, g: 0,   b: 1.0})
+#define LAYER_COLOR_L1 ((RGB){r: 1.0, g: 0.5, b: 0})
 #define LAYER_COLOR_L2 ((RGB){r: 0,   g: 1.0, b: 0})
-#define LAYER_COLOR_L3 ((RGB){r: 0,   g: 0.4, b: 1.0})
+#define LAYER_COLOR_L3 ((RGB){r: 0,   g: 1.0, b: 0.5})
 #define LAYER_COLOR_LX ((RGB){r: 0,   g: 0,   b: 0})
 
 #define BREATHE_LENGTH 5000
@@ -263,9 +263,19 @@ int indicator_led_strip_toggle(void) {
 
 //// Battery Listener
 
+static int16_t battery_state_of_charge_wait() {
+    int retry = 0;
+    int16_t battery_level = zmk_battery_state_of_charge();
+    while (battery_level == 0 && retry++ < 10) {
+        k_sleep(K_MSEC(100));
+        battery_level = zmk_battery_state_of_charge();
+    };
+    return battery_level;
+}
+
 #define SET_INDICATOR_COLOR(CL, FL, VAL) \
     if (CL > VAL && VAL >= FL) { \
-    const float rate_ = (VAL - FL) / 10.0f; \
+    const float rate_ = (VAL - FL) / (float)(CL - FL); \
     indicators[POWER_INDEX].r = POWER_COLOR_##FL.r + (POWER_COLOR_##CL.r - POWER_COLOR_##FL.r) * rate_; \
     indicators[POWER_INDEX].g = POWER_COLOR_##FL.g + (POWER_COLOR_##CL.g - POWER_COLOR_##FL.g) * rate_; \
     indicators[POWER_INDEX].b = POWER_COLOR_##FL.b + (POWER_COLOR_##CL.b - POWER_COLOR_##FL.b) * rate_; }
@@ -275,7 +285,7 @@ static int battery_listener_cb(const zmk_event_t *eh) {
 
     int16_t rate = (eh != NULL)
         ? as_zmk_battery_state_changed(eh)->state_of_charge
-        : zmk_battery_state_of_charge();
+        : battery_state_of_charge_wait();
     // avoid value "100"
     rate = rate >= 100 ? 99 : rate;
 
@@ -312,6 +322,7 @@ static int bluetooth_listener_cb(const zmk_event_t *eh) {
     } else {
         indicators[BLUET_INDEX] = BLUET_COLOR_DISCON;
     }
+    animation_counter = 0;
     return 0;
 }
 
