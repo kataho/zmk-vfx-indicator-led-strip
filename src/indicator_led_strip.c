@@ -255,10 +255,12 @@ int indicator_led_strip_toggle(void) {
         state_mode = ACTIVE_MODE;
         animation_on();
         ext_power_on();
+        break;
     default:
         state_mode = OFF;
         ext_power_off();
         animation_off();
+        break;
     }
     return 0;
 }
