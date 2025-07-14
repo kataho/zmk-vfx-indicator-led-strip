@@ -10,6 +10,7 @@
 #include <zephyr/drivers/led_strip.h>
 #include <drivers/ext_power.h>
 
+#include <zmk/usb.h>
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
@@ -62,6 +63,7 @@
 #define BLINK_ON_LENGTH 20
 
 #define ACTIVE_MODE BREATHE
+#define IDLE_USB_MODE BREATHE
 #define IDLE_MODE BLINK
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -353,14 +355,19 @@ static int activity_state_listener_cb(const zmk_event_t *eh) {
     switch (zmk_activity_get_state()) {
     case ZMK_ACTIVITY_ACTIVE:
         if (state_mode != ACTIVE_MODE) animation_counter = 0;
+        if (state_mode == OFF) animation_on();
         state_mode = ACTIVE_MODE;
-        if (IDLE_MODE == OFF) animation_on();
         ext_power_on();
         break;
     case ZMK_ACTIVITY_IDLE:
-        if (IDLE_MODE == OFF) animation_off();
-        if (state_mode != IDLE_MODE) animation_counter = 0;
-        state_mode = IDLE_MODE;
+        if (zmk_usb_is_powered()) {
+            if (state_mode != IDLE_USB_MODE) animation_counter = 0;
+            state_mode = IDLE_USB_MODE;
+        } else {
+            if (state_mode != IDLE_MODE) animation_counter = 0;
+            state_mode = IDLE_MODE;
+        }
+        if (state_mode == OFF) animation_off();
         break;
     default:
         break;
