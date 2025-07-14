@@ -53,7 +53,7 @@
 #define LAYER_COLOR_L0 ((RGB){r: 1.0, g: 0,   b: 0})
 #define LAYER_COLOR_L1 ((RGB){r: 1.0, g: 0.5, b: 0})
 #define LAYER_COLOR_L2 ((RGB){r: 0,   g: 1.0, b: 0})
-#define LAYER_COLOR_L3 ((RGB){r: 0,   g: 1.0, b: 0.5})
+#define LAYER_COLOR_L3 ((RGB){r: 0,   g: 0.5, b: 1.0})
 #define LAYER_COLOR_LX ((RGB){r: 0,   g: 0,   b: 0})
 
 #define BREATHE_LENGTH 5000
