@@ -40,7 +40,7 @@
 #define POWER_COLOR_40   ((RGB){r: 0,   g: 1.0, b: 0.3})
 #define POWER_COLOR_30   ((RGB){r: 0,   g: 1.0, b: 0})
 #define POWER_COLOR_20   ((RGB){r: 0,   g: 1.0, b: 0})
-#define POWER_COLOR_10   ((RGB){r: 1.0, g: 0,   b: 0})
+#define POWER_COLOR_10   ((RGB){r: 0.5, g: 0.5, b: 0})
 #define POWER_COLOR_0    ((RGB){r: 1.0, g: 0,   b: 0})
 
 #define BLUET_COLOR_ADVERT ((RGB){r: 0, g: 0, b: 1.0})
@@ -279,10 +279,11 @@ static int16_t battery_state_of_charge_wait() {
 
 #define SET_INDICATOR_COLOR(CL, FL, VAL) \
     if (CL > VAL && VAL >= FL) { \
-    const float rate_ = (VAL - FL) / (float)(CL - FL); \
+    const float rate_ = (float)(VAL - FL) / (float)(CL - FL); \
     indicators[POWER_INDEX].r = POWER_COLOR_##FL.r + (POWER_COLOR_##CL.r - POWER_COLOR_##FL.r) * rate_; \
     indicators[POWER_INDEX].g = POWER_COLOR_##FL.g + (POWER_COLOR_##CL.g - POWER_COLOR_##FL.g) * rate_; \
-    indicators[POWER_INDEX].b = POWER_COLOR_##FL.b + (POWER_COLOR_##CL.b - POWER_COLOR_##FL.b) * rate_; }
+    indicators[POWER_INDEX].b = POWER_COLOR_##FL.b + (POWER_COLOR_##CL.b - POWER_COLOR_##FL.b) * rate_; \
+    return 0; }
 
 static int battery_listener_cb(const zmk_event_t *eh) {
     if (state_mode == OFF) return 0;
@@ -293,14 +294,15 @@ static int battery_listener_cb(const zmk_event_t *eh) {
     // avoid value "100"
     rate = rate >= 100 ? 99 : rate;
 
-    SET_INDICATOR_COLOR(100, 90, rate) else
-    SET_INDICATOR_COLOR(90, 80, rate) else
-    SET_INDICATOR_COLOR(80, 70, rate) else
-    SET_INDICATOR_COLOR(60, 50, rate) else
-    SET_INDICATOR_COLOR(50, 40, rate) else
-    SET_INDICATOR_COLOR(40, 30, rate) else
-    SET_INDICATOR_COLOR(30, 20, rate) else
-    SET_INDICATOR_COLOR(20, 10, rate) else
+    SET_INDICATOR_COLOR(100, 90, rate)
+    SET_INDICATOR_COLOR(90, 80, rate)
+    SET_INDICATOR_COLOR(80, 70, rate)
+    SET_INDICATOR_COLOR(70, 60, rate)
+    SET_INDICATOR_COLOR(60, 50, rate)
+    SET_INDICATOR_COLOR(50, 40, rate)
+    SET_INDICATOR_COLOR(40, 30, rate)
+    SET_INDICATOR_COLOR(30, 20, rate)
+    SET_INDICATOR_COLOR(20, 10, rate)
     SET_INDICATOR_COLOR(10, 0, rate)
 
     return 0;
