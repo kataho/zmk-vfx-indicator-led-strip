@@ -18,6 +18,8 @@
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/activity_state_changed.h>
+#include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/events/endpoint_changed.h>
 #include <zmk/workqueue.h>
 #include <zmk/keymap.h>
 
@@ -31,6 +33,7 @@
 #define BLUET_INDEX 1
 #define LAYER_INDEX 2
 
+#define POWER_COLOR_USB  ((RGB){r: 0.8, g: 0.8, b: 0.8})
 #define POWER_COLOR_100  ((RGB){r: 0,   g: 1.0, b: 0.3})
 #define POWER_COLOR_90   ((RGB){r: 0,   g: 1.0, b: 0.3})
 #define POWER_COLOR_80   ((RGB){r: 0,   g: 1.0, b: 0.3})
@@ -43,12 +46,13 @@
 #define POWER_COLOR_10   ((RGB){r: 0.5, g: 0.5, b: 0})
 #define POWER_COLOR_0    ((RGB){r: 1.0, g: 0,   b: 0})
 
+#define BLUET_COLOR_USB  ((RGB){r: 1.0, g: 1.0, b: 1.0})
 #define BLUET_COLOR_ADVERT ((RGB){r: 0, g: 0, b: 1.0})
 #define BLUET_COLOR_DISCON ((RGB){r: 0, g: 0, b: 0})
 #define BLUET_COLOR_P0  ((RGB){r: 1.0, g: 0.3, b: 0})
 #define BLUET_COLOR_P1  ((RGB){r: 0,   g: 0.8, b: 1.0})
 #define BLUET_COLOR_P2  ((RGB){r: 0.3, g: 1.0, b: 0})
-#define BLUET_COLOR_PX  ((RGB){r: 1.0, g: 1.0, b: 1.0})
+#define BLUET_COLOR_PX  ((RGB){r: 0.8, g: 0.8, b: 0.8})
 
 #define LAYER_COLOR_L0 ((RGB){r: 1.0, g: 0,   b: 0})
 #define LAYER_COLOR_L1 ((RGB){r: 1.0, g: 0.5, b: 0})
@@ -288,9 +292,13 @@ static int16_t battery_state_of_charge_wait() {
 static int battery_listener_cb(const zmk_event_t *eh) {
     if (state_mode == OFF) return 0;
 
-    int16_t rate = (eh != NULL)
-        ? as_zmk_battery_state_changed(eh)->state_of_charge
-        : battery_state_of_charge_wait();
+    if (zmk_usb_is_powered()) {
+        indicators[POWER_INDEX] = POWER_COLOR_USB;
+        return 0;
+    }
+
+    struct zmk_battery_state_changed *ev = (eh != NULL) ? as_zmk_battery_state_changed(eh) : NULL;
+    int16_t rate = (ev != NULL) ? ev->state_of_charge : battery_state_of_charge_wait();
     // avoid value "100"
     rate = rate >= 100 ? 99 : rate;
 
@@ -310,13 +318,16 @@ static int battery_listener_cb(const zmk_event_t *eh) {
 
 ZMK_LISTENER(indicator_battery_listener, battery_listener_cb);
 ZMK_SUBSCRIPTION(indicator_battery_listener, zmk_battery_state_changed);
+ZMK_SUBSCRIPTION(indicator_battery_listener, zmk_usb_conn_state_changed);
 
-//// Bluetooth Listener
+//// Endpoint(Bluetooth & USB) Listener
 
 static int bluetooth_listener_cb(const zmk_event_t *eh) {
     if (state_mode == OFF) return 0;
 
-    if (zmk_ble_active_profile_is_connected()) {
+    if (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB) {
+        indicators[BLUET_INDEX] = BLUET_COLOR_USB;
+    } else if (zmk_ble_active_profile_is_connected()) {
         switch (zmk_ble_active_profile_index()) {
             case 0: indicators[BLUET_INDEX] = BLUET_COLOR_P0; break;
             case 1: indicators[BLUET_INDEX] = BLUET_COLOR_P1; break;
@@ -334,6 +345,7 @@ static int bluetooth_listener_cb(const zmk_event_t *eh) {
 
 ZMK_LISTENER(indicator_bluetooth_listener, bluetooth_listener_cb);
 ZMK_SUBSCRIPTION(indicator_bluetooth_listener, zmk_ble_active_profile_changed);
+ZMK_SUBSCRIPTION(indicator_bluetooth_listener, zmk_endpoint_changed);
 
 //// Layer Listener
 
