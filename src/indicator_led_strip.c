@@ -47,7 +47,7 @@
 #define POWER_COLOR_0    ((RGB){r: 1.0, g: 0,   b: 0})
 
 #define BLUET_COLOR_USB  ((RGB){r: 1.0, g: 1.0, b: 1.0})
-#define BLUET_COLOR_ADVERT ((RGB){r: 0, g: 0, b: 1.0})
+#define BLUET_COLOR_ADVERT ((RGB){r: 0.2, g: 0, b: 0.2})
 #define BLUET_COLOR_DISCON ((RGB){r: 0, g: 0, b: 0})
 #define BLUET_COLOR_P0  ((RGB){r: 1.0, g: 0.3, b: 0})
 #define BLUET_COLOR_P1  ((RGB){r: 0,   g: 0.8, b: 1.0})
@@ -97,12 +97,13 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #endif
 #endif
 
-enum indicator_mode {
+typedef enum indicator_mode {
     OFF = 0,
+    KEEP_OFF,
     SOLID,
     BREATHE,
     BLINK
-};
+} MODE;
 
 typedef struct {
     float r;
@@ -113,7 +114,7 @@ typedef struct {
 static const struct device *led_strip;
 static RGB indicators[STRIP_NUM_PIXELS];
 static RGB fractions[STRIP_NUM_PIXELS];
-static enum indicator_mode state_mode;
+static MODE state_mode;
 static uint32_t animation_counter = 0;
 
 #if IS_ENABLED(CONFIG_INDICATOR_LED_STRIP_EXT_POWER)
@@ -251,19 +252,35 @@ static void animation_off(void) {
     k_timer_stop(&indicator_timer);
 }
 
+//// Utility
+
+static void set_state_mode(MODE mode) {
+    if (state_mode == mode) return;
+    if (state_mode == KEEP_OFF) return;
+    if (mode == OFF) {
+        animation_off();
+        ext_power_off();
+    } else {
+        animation_on();
+        ext_power_on();
+    }
+    animation_counter = 0;
+    state_mode = mode;
+}
+
+//// Befavior Toggle
+
 int indicator_led_strip_toggle(void) {
     if (!led_strip) return -ENODEV;
 
     switch (state_mode) {
-    case OFF:
-        state_mode = ACTIVE_MODE;
-        animation_on();
-        ext_power_on();
+    case KEEP_OFF:
+        state_mode = OFF;
+        set_state_mode(ACTIVE_MODE);
         break;
     default:
-        state_mode = OFF;
-        ext_power_off();
-        animation_off();
+        set_state_mode(OFF);
+        state_mode = KEEP_OFF;
         break;
     }
     return 0;
@@ -327,6 +344,7 @@ static int bluetooth_listener_cb(const zmk_event_t *eh) {
 
     if (zmk_endpoints_selected().transport == ZMK_TRANSPORT_USB) {
         indicators[BLUET_INDEX] = BLUET_COLOR_USB;
+        if (zmk_activity_get_state() == ZMK_ACTIVITY_IDLE) set_state_mode(IDLE_USB_MODE);
     } else if (zmk_ble_active_profile_is_connected()) {
         switch (zmk_ble_active_profile_index()) {
             case 0: indicators[BLUET_INDEX] = BLUET_COLOR_P0; break;
@@ -370,20 +388,10 @@ ZMK_SUBSCRIPTION(indicator_layer_listener, zmk_layer_state_changed);
 static int activity_state_listener_cb(const zmk_event_t *eh) {
     switch (zmk_activity_get_state()) {
     case ZMK_ACTIVITY_ACTIVE:
-        if (state_mode != ACTIVE_MODE) animation_counter = 0;
-        if (state_mode == OFF) animation_on();
-        state_mode = ACTIVE_MODE;
-        ext_power_on();
+        set_state_mode(ACTIVE_MODE);
         break;
     case ZMK_ACTIVITY_IDLE:
-        if (zmk_usb_is_powered()) {
-            if (state_mode != IDLE_USB_MODE) animation_counter = 0;
-            state_mode = IDLE_USB_MODE;
-        } else {
-            if (state_mode != IDLE_MODE) animation_counter = 0;
-            state_mode = IDLE_MODE;
-        }
-        if (state_mode == OFF) animation_off();
+        set_state_mode(zmk_usb_is_powered() ? IDLE_USB_MODE : IDLE_MODE);
         break;
     default:
         break;
